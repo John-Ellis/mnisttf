@@ -6,12 +6,18 @@ import numpy as np
 
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
-cd
+
 import tensorflow as tf
 sess = tf.InteractiveSession()
 
 #Bookeeping:
 model_path = "model/model.ckpt"
+checkpoint = 'ckpt/tfcnn'
+train_iter = 201
+
+
+#accuracy term
+accs = []
 
 #Building the map
 
@@ -112,21 +118,22 @@ saver = tf.train.Saver()
 
 with tf.Session() as sess:
   sess.run(tf.global_variables_initializer())
-  for i in range(2000):
+  
+  for i in range(train_iter):
     batch = mnist.train.next_batch(50)
-    if (i+1) % 100 == 0:
+    if i % 100 == 0:
       train_accuracy = accuracy.eval(feed_dict={
           x: batch[0], y_: batch[1], keep_prob: 1.0})
       print('step %d, training accuracy %g' % (i, train_accuracy))
     train_step.run(feed_dict={x: batch[0], y_: batch[1], keep_prob: 0.5})
-    if (i+1) % 5000 == 0:
-      saver.save(sess, 'tfcnn', global_step=i)
-
-  save_path = saver.save(sess, model_path)
+    if i % 200 == 0:
+      saver.save(sess, checkpoint, global_step=i)
+  
+  save_path = saver.save(sess, model_path, global_step=train_iter )
   print("Model saved in file: %s" % save_path)
 
 
-  for i in range(100):
+  for i in range(500):
     batch = mnist.test.next_batch(50)
     accs.append(accuracy.eval(feed_dict={
       x: batch[0], y_: batch[1], keep_prob: 1.0}))

@@ -8,11 +8,14 @@ os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
+
 import tensorflow as tf
 sess = tf.InteractiveSession()
 
 #Bookeeping:
-model_path = "model/model.ckpt"
+model_path = "model/model.ckpt-201"
+checkpath = "ckpt/tfcnn-16000"
+train_iter = 2000
 
 #Input Initialization
 x = tf.placeholder(tf.float32, shape=[None, 784])
@@ -74,20 +77,25 @@ b_fc2 = bias_variable([10])
 y_conv = tf.matmul(h_fc1_drop, W_fc2) + b_fc2
 
 
-# Checking the Data
+# Checking the Output
 correct_prediction = tf.equal(tf.argmax(y_conv, 1), tf.argmax(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
 #Doing the work
-sess.run(tf.global_variables_initializer())
+#sess.run(tf.global_variables_initializer())
 #creates the saver
 #saver = tf.train.Saver()
 #[W_conv1, b_conv1, W_conv2, b_conv2, W_fc1, b_fc1, W_fc2, b_fc2]
 
+
+#saver = tf.train.Saver()
+#init = tf.initialize_all_variables()
+
 #Start the Session
 with tf.Session() as sess:
-  #sess.run(tf.global_variables_initializer())
+  sess.run(tf.global_variables_initializer())
+  
   # Restore variables from disk.
   rec_saver = tf.train.import_meta_graph(model_path + '.meta')
   rec_saver.restore(sess, model_path)
@@ -98,3 +106,4 @@ with tf.Session() as sess:
     accs.append(accuracy.eval(feed_dict={x: batch[0], y_: batch[1], keep_prob: 1.0}))
   
   print('test accuracy %g' % np.mean(accs))
+
